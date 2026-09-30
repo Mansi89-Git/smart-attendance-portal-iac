@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: Smart Attendance and Leave Portal Infrastructure
+
+Resources:
+
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: SmartAttendance-Users
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+
+  AttendanceTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: SmartAttendance-Attendance
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: attendanceId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: attendanceId
+          KeyType: HASH
+
+  LeaveRequestsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: SmartAttendance-LeaveRequests
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: leaveId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: leaveId
+          KeyType: HASH
+
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: smart-attendance-cloudformation-mansi
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: SmartAttendance-CloudFormation-Lambda-Role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
+
+Outputs:
+
+  UsersTableName:
+    Value: !Ref UsersTable
+
+  AttendanceTableName:
+    Value: !Ref AttendanceTable
+
+  LeaveRequestsTableName:
+    Value: !Ref LeaveRequestsTable
+
+  FrontendBucketName:
+    Value: !Ref FrontendBucket
+
+  LambdaRoleName:
+    Value: !Ref LambdaExecutionRole
