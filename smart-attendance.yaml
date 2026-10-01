@@ -1,6 +1,12 @@
 AWSTemplateFormatVersion: '2010-09-09'
 
-Description: Smart Attendance and Leave Portal Infrastructure
+Description: Smart Attendance and Leave Portal Infrastructure with EC2
+
+Parameters:
+
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
 
 Resources:
 
@@ -62,6 +68,29 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
 
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Smart Attendance EC2
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  AttendanceEC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: t3.micro
+      Tags:
+        - Key: Name
+          Value: SmartAttendance-EC2
+
 Outputs:
 
   UsersTableName:
@@ -78,3 +107,9 @@ Outputs:
 
   LambdaRoleName:
     Value: !Ref LambdaExecutionRole
+
+  EC2InstanceId:
+    Value: !Ref AttendanceEC2
+
+  EC2PublicIP:
+    Value: !GetAtt AttendanceEC2.PublicIp
